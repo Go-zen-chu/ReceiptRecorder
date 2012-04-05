@@ -1,0 +1,15 @@
+{% extends "admin/base.html" %}
+	{% block content %}
+	<table>
+		<tr><th>年月</th>
+		<th>合計支払い金額</th><th>彬->慧智</th><th>慧智->彬</th><th>計（彬->慧智）</th>
+		<th>今月の費用(二人)</th><th>今月の費用(慧智)</th><th>今月の費用(彬)</th></tr>
+	{% for data in result %}
+		<tr>
+			<td>{{ data.0.0 }}年{{ data.0.1 }}月</td>
+			<td>{{ data.1 }}円</td><td>{{ data.2 }}円</td><td>{{ data.3 }}円</td><td>{{ data.4 }}円</td>
+			<td>{{ data.5 }}円</td><td>{{ data.6 }}円</td><td>{{ data.7 }}円</td>
+		</tr>
+	{% endfor %}
+	</table>
+	{% endblock %}
