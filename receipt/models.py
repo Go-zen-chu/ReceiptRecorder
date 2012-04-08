@@ -4,6 +4,13 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from datetime import datetime    
 
+class Shop(models.Model):
+    name = models.CharField(u'店名', max_length=128, blank=False)
+
+    def __unicode__(self):
+        return "%s" % (self.name)
+
+
 class Receipt(models.Model):
     # id is added automatically
     date_of_purchase = models.DateTimeField(u"購入日", default=datetime.now)
@@ -13,6 +20,7 @@ class Receipt(models.Model):
     keichi_expense = models.IntegerField(u"慧智自腹の分", blank=True, default=0)
     akira_expense = models.IntegerField(u"彬自腹の分", blank=True, default=0)
     memo = models.CharField(u"メモ", max_length=140, blank=True)
+    shop = models.ForeignKey(Shop, blank=False)
     
     def __unicode__(self):
         return "[%s]%s" % (self.date_of_purchase, self.memo)

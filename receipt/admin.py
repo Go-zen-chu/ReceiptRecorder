@@ -1,5 +1,5 @@
 # encoding: utf-8
-from ReceiptRecorder.receipt.models import Receipt
+from ReceiptRecorder.receipt.models import Receipt, Shop
 from django.conf.urls.defaults import *
 from django.contrib import admin
 from django.http import HttpResponse
@@ -74,3 +74,4 @@ class ReceiptAdmin(admin.ModelAdmin):
     
 # Receiptクラスをadminサイトに反映させる
 admin.site.register(Receipt, ReceiptAdmin)
+admin.site.register(Shop)
