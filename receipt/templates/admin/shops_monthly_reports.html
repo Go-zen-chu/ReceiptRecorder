@@ -4,7 +4,7 @@
 	{% for date in date_list %}
 		<tr align=right><td>年月</td><td>{{ date.0 }}年{{ date.1 }}月</td></tr>
 		<tr align=right><td>店舗名</td> {% for shop in shop_list %} <td>{{ shop }}</td> {% endfor %}</tr>
-		<tr align=right><td>支払額</td>{% for total in total_payment_list %} <td>{{ total }}円</td> {% endfor %} </tr>
+		<tr align=right><td>支払額</td>{% for total in total_payment_list %} <td>{{ total|lookup:date }}円</td> {% endfor %} </tr>
 		<tr><td></td></tr>
 	{% endfor %}
 	</table>

@@ -7,6 +7,17 @@ from django.utils.functional import update_wrapper
 from django.views.generic.simple import direct_to_template
 from django.db.models import Sum
 
+#テンプレートフィルタを定義するためにインポート
+from django.template.defaultfilters import register
+
+#テンプレートファイル内で辞書のルックアップを可能にするテンプレートフィルタ
+@register.filter(name='lookup')
+def lookup(dict, index):
+    if index in dict:
+        return dict[index]
+    return ''
+
+
 class ReceiptAdmin(admin.ModelAdmin):
     list_display = ("date_of_purchase","total_payment","memo","payment_user","common_payment","keichi_expense","akira_expense","shop")
     # 以下、日付の詳細なフィルター
@@ -85,16 +96,13 @@ class ShopAdmin(admin.ModelAdmin):
         last_date = Receipt.objects.all().order_by("-date_of_purchase")[0].date_of_purchase
         year = first_date.year
         month = first_date.month
+
         date_list = []
-        shop_list = []
+        shop_list = Shop.objects.all()
         total_payment_list = []
         while True:
-            for receipt in Receipt.objects.filter(date_of_purchase__year=year,
-                                                date_of_purchase__month=month).select_related(depth=1).values("shop__name").annotate(total=Sum("total_payment")):
-                shop_list.append(receipt["shop__name"])
-                total_payment_list.append(receipt["total"])
-                
-            date_list.append((year,month))
+            date = (year, month)
+            date_list.append(date)
             
             if last_date.year == year and last_date.month == month:
                 break
@@ -104,7 +112,25 @@ class ShopAdmin(admin.ModelAdmin):
             if month == 13:
                 month = 1
                 year += 1
-                
+
+        #全ての店についてループ
+        for shop_name in shop_list:
+            total_payment_list.append({})
+
+            #全ての月についてループ
+            for date in date_list:
+
+                #対象の店で対象の月に購入した合計金額を問い合わせ
+                aggregated = Receipt.objects.filter(date_of_purchase__year=date[0], date_of_purchase__month=date[1],
+                    shop__name=shop_name).values('shop__name').annotate(total=Sum("total_payment"))
+
+                #何かしら購入していれば(レシートが存在すれば)合計金額を記録
+                if len(aggregated) == 1 and aggregated[0].has_key('total'):
+                    total_payment_list[-1].update({date: aggregated[0]['total']})
+                #何も購入していなければ合計金額は0円とする
+                else:
+                    total_payment_list[-1].update({date: 0})
+
         context = { 'title': u"店舗別支払い", 'date_list': date_list, 'shop_list': shop_list,
                      'total_payment_list': total_payment_list, }
         return direct_to_template(request, "shops_monthly_reports.html", context)
